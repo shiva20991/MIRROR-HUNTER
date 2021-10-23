@@ -13,10 +13,17 @@ import string
 
 def cloneNode(update, context):
     args = update.message.text.split(" ", maxsplit=1)
+    reply_to = update.message.reply_to_message
     uname = f'<a href="tg://user?id={update.message.from_user.id}">{update.message.from_user.first_name}</a>'
     uid= f"<a>{update.message.from_user.id}</a>"
     if len(args) > 1:
         link = args[1]
+        elif reply_to is not None:
+        reply_text = reply_to.text
+        link = reply_text.split('\n')[0]
+    else:
+        link = None
+    if link is not None:
         gd = gdriveTools.GoogleDriveHelper()
         res, size, name, files = gd.clonehelper(link)
         if res != "":
@@ -24,7 +31,7 @@ def cloneNode(update, context):
             return
         if STOP_DUPLICATE:
             LOGGER.info('Checking File/Folder if already in Drive...')
-            smsg, button = gd.drive_list(name, True, True)
+            smsg, button = gd.drive_list(name, True)
             if smsg:
                 msg3 = "File/Folder is already available in Drive.\nHere are the search results:"
                 sendMarkup(msg3, context.bot, update, button)
